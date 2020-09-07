@@ -173,7 +173,8 @@ fun createTestTask(
 
     return project.tasks.create(testTaskName, RunTestExecutable::class.java).configure {
         dependsOn(linkTask)
-        val xmlReport = project.buildDir.resolve("testReports/$testTaskName.xml")
+        outputDir = project.buildDir.resolve("testReports/$testTaskName")
+        val xmlReport = outputDir.resolve("report.xml")
         executable(linkTask.outputFile)
         args("--gtest_output=xml:${xmlReport.absoluteFile}")
     }
