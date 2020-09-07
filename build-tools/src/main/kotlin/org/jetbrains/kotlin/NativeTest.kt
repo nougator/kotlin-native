@@ -50,16 +50,22 @@ open class LinkNativeTest @Inject constructor(
                 linkerArgs: List<String>
         ): LinkNativeTest {
             val linker = platformManager.platform(platformManager.targetByName(target)).linker
+            // TODO: Remove when the problem with __throw_length_error is fixed.
+            val additionalLinkerArgs = if (linker is GccBasedLinker) {
+                listOf("-z", "muldefs")
+            } else {
+                emptyList()
+            }
             val commands = linker.linkCommands(
                     inputFiles.map { it.absolutePath },
                     outputFile.absolutePath,
                     listOf(),
-                    linkerArgs,
-                    false,
-                    false,
-                    LinkerOutputKind.EXECUTABLE,
-                    "",
-                    false
+                    linkerArgs + additionalLinkerArgs,
+                    optimize = false,
+                    debug = false,
+                    kind = LinkerOutputKind.EXECUTABLE,
+                    outputDsymBundle = "",
+                    needsProfileLibrary = false
             ).map { it.argsWithExecutable }
             return project.tasks.create(
                     taskName,
