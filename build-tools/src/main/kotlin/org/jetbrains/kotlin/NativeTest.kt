@@ -51,10 +51,10 @@ open class LinkNativeTest @Inject constructor(
         ): LinkNativeTest {
             val linker = platformManager.platform(platformManager.targetByName(target)).linker
             // TODO: Remove when the problem with __throw_length_error is fixed.
-            val additionalLinkerArgs = if (linker is GccBasedLinker) {
-                listOf("-z", "muldefs")
-            } else {
-                emptyList()
+            val additionalLinkerArgs = when (linker) {
+                is GccBasedLinker -> listOf("-z", "muldefs")
+                is MingwLinker -> listOf("-Wl,--allow-multiple-definition")
+                else -> emptyList()
             }
             val commands = linker.linkCommands(
                     inputFiles.map { it.absolutePath },
