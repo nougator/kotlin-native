@@ -16,6 +16,9 @@ external private fun derefWorkerBoundReference(ref: NativePtr): Any?
 @SymbolName("Kotlin_WorkerBoundReference_describe")
 external private fun describeWorkerBoundReference(ref: NativePtr): String
 
+@SymbolName("Kotlin_WorkerBoundReference_clean")
+external private fun cleanWorkerBoundReference(ref: NativePtr): Unit
+
 /**
  * A shared reference to a Kotlin object that doesn't freeze the referred object when it gets frozen itself.
  *
@@ -55,12 +58,17 @@ public class WorkerBoundReference<out T : Any>(value: T) {
      */
     val worker: Worker = Worker.current
 
+    private lateinit var cleaner: Cleaner
+
     @ExportForCppRuntime("Kotlin_WorkerBoundReference_freezeHook")
     private fun freezeHook() {
         // If this hook was already run, do nothing.
         if (valueBeforeFreezing == null)
             return
         ptr = createWorkerBoundReference(valueBeforeFreezing!!)
+        cleaner = createCleaner(ptr) {
+            cleanWorkerBoundReference(it)
+        }
         valueBeforeFreezing = null
     }
 }
