@@ -33,6 +33,7 @@
 #include "Alloc.h"
 #include "KAssert.h"
 #include "Atomic.h"
+#include "Cleaner.h"
 #if USE_CYCLIC_GC
 #include "CyclicCollector.h"
 #endif  // USE_CYCLIC_GC
@@ -1069,6 +1070,9 @@ ALWAYS_INLINE void runDeallocationHooks(ContainerHeader* container) {
   ObjHeader* obj = reinterpret_cast<ObjHeader*>(container + 1);
   for (uint32_t index = 0; index < container->objectCount(); index++) {
     auto* type_info = obj->type_info();
+    if (type_info == theCleanerImplTypeInfo) {
+        DisposeCleaner(obj);
+    }
     if (type_info == theWorkerBoundReferenceTypeInfo) {
       DisposeWorkerBoundReference(obj);
     }
