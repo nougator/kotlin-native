@@ -5,25 +5,24 @@
 
 package kotlin.native.internal
 
+import kotlinx.cinterop.*
+
 public interface Cleaner
 
 @NoReorderFields
 @ExportTypeInfo("theCleanerImplTypeInfo")
-private class CleanerImpl<T>(
-    private val obj: T,
-    private val cleanObj: (T) -> Unit
-): Cleaner {
+private class CleanerImpl(
+    private val obj: Any?,
+    private val cleanObj: CPointer<CFunction<*>>,
+): Cleaner {}
 
-    @ExportForCppRuntime("Kotlin_CleanerImpl_clean")
-    private fun clean() {
-        cleanObj(obj)
-    }
+@ExportForCompiler
+private fun createCleanerImpl(argument: Any?, block: CPointer<CFunction<*>>): Cleaner {
+    return CleanerImpl(argument, block)
 }
 
 /**
  * If [block] throws an exception, the entire program terminates.
  */
-fun <T> createCleaner(argument: T, block: (T) -> Unit): Cleaner {
-    // TODO: Make sure that block is non-capturing.
-    return CleanerImpl(argument, block)
-}
+@TypedIntrinsic(IntrinsicType.CREATE_CLEANER)
+external fun <T> createCleaner(argument: T, @VolatileLambda block: (T) -> Unit): Cleaner

@@ -5,15 +5,30 @@
 
 #include "Cleaner.h"
 
-// Defined in Cleaner.kt
-extern "C" void Kotlin_CleanerImpl_clean(KRef thiz);
+namespace {
+
+struct CleanerImpl {
+  ObjHeader header;
+  KRef obj;
+  KNativePtr cleanObj;
+};
+
+
+CleanerImpl* asCleanerImpl(KRef thiz) {
+  RuntimeAssert(thiz->type_info() == theCleanerImplTypeInfo, "Must be Cleaner");
+  return reinterpret_cast<CleanerImpl*>(thiz);
+}
+
+}
 
 RUNTIME_NOTHROW void DisposeCleaner(KRef thiz) {
+  auto* cleaner = asCleanerImpl(thiz);
+  auto* cleanObj = reinterpret_cast<void(*)(KRef)>(cleaner->cleanObj);
 #if KONAN_NO_EXCEPTIONS
-    Kotlin_CleanerImpl_clean(thiz);
+    cleanObj(cleaner->obj);
 #else
     try {
-        Kotlin_CleanerImpl_clean(thiz);
+        cleanObj(cleaner->obj);
     } catch (...) {
         // A trick to terminate with unhandled exception. This will print a stack trace
         // and write to iOS crash log.
