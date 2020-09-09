@@ -20,6 +20,9 @@ private class CleanerImpl<T>(
     }
 }
 
+/**
+ * If [block] throws an exception, the entire program terminates.
+ */
 fun <T> createCleaner(argument: T, block: (T) -> Unit): Cleaner {
     // TODO: Make sure that block is non-capturing.
     return CleanerImpl(argument, block)

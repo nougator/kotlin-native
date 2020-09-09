@@ -9,6 +9,15 @@
 extern "C" void Kotlin_CleanerImpl_clean(KRef thiz);
 
 RUNTIME_NOTHROW void DisposeCleaner(KRef thiz) {
-    // TODO: Make sure this does not throw.
+#if KONAN_NO_EXCEPTIONS
     Kotlin_CleanerImpl_clean(thiz);
+#else
+    try {
+        Kotlin_CleanerImpl_clean(thiz);
+    } catch (...) {
+        // A trick to terminate with unhandled exception. This will print a stack trace
+        // and write to iOS crash log.
+        std::terminate();
+    }
+#endif
 }
