@@ -33,13 +33,11 @@ OBJ_GETTER(Kotlin_WorkerBoundReference_describe, KNativePtr holder) {
 }
 
 RUNTIME_NOTHROW void Kotlin_WorkerBoundReference_clean(KNativePtr holder) {
-  // Can be null if WorkerBoundReference wasn't frozen.
-  if (!holder)
-    return;
+    // Can be null if WorkerBoundReference wasn't frozen.
+    if (!holder) return;
 
-  auto* typedHolder = reinterpret_cast<KRefSharedHolder*>(holder);
-  typedHolder->dispose();
-  konanDestructInstance(typedHolder);
+    auto* typedHolder = reinterpret_cast<KRefSharedHolder*>(holder);
+    typedHolder->dispose();
+    konanDestructInstance(typedHolder);
 }
-
 }
