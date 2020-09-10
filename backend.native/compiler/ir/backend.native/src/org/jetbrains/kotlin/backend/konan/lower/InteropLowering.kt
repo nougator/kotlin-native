@@ -1177,29 +1177,6 @@ private class InteropTransformer(val context: Context, override val irFile: IrFi
                         putValueArgument(3, jobPointer)
                     }
                 }
-                IntrinsicType.CREATE_CLEANER -> {
-                    val irCallableReference = unwrapStaticFunctionArgument(expression.getValueArgument(1)!!)
-
-                    if (irCallableReference == null || irCallableReference.getArguments().isNotEmpty()) {
-                        context.reportCompilationError(
-                                "${function.fqNameForIrSerialization} must take an unbound, non-capturing function or lambda",
-                                irFile, expression
-                        )
-                    }
-
-                    val targetSymbol = irCallableReference.symbol
-                    val blockPointer = IrFunctionReferenceImpl(
-                            builder.startOffset, builder.endOffset,
-                            symbols.createCleanerImpl.owner.valueParameters[1].type,
-                            targetSymbol,
-                            typeArgumentsCount = 0,
-                            reflectionTarget = null)
-
-                    builder.irCall(symbols.createCleanerImpl).apply {
-                        putValueArgument(0, expression.getValueArgument(0))
-                        putValueArgument(1, blockPointer)
-                    }
-                }
                 else -> expression
             }
         }
