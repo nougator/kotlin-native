@@ -8,21 +8,22 @@
 namespace {
 
 struct CleanerImpl {
-    ObjHeader header;
-    KRef obj;
-    KNativePtr cleanObj;
+  ObjHeader header;
+  KRef obj;
+  KNativePtr cleanObj;
 };
 
+
 CleanerImpl* asCleanerImpl(KRef thiz) {
-    RuntimeAssert(thiz->type_info() == theCleanerImplTypeInfo, "Must be Cleaner");
-    return reinterpret_cast<CleanerImpl*>(thiz);
+  RuntimeAssert(thiz->type_info() == theCleanerImplTypeInfo, "Must be Cleaner");
+  return reinterpret_cast<CleanerImpl*>(thiz);
 }
 
-} // namespace
+}
 
 RUNTIME_NOTHROW void DisposeCleaner(KRef thiz) {
-    auto* cleaner = asCleanerImpl(thiz);
-    auto* cleanObj = reinterpret_cast<void (*)(KRef)>(cleaner->cleanObj);
+  auto* cleaner = asCleanerImpl(thiz);
+  auto* cleanObj = reinterpret_cast<void(*)(KRef)>(cleaner->cleanObj);
 #if KONAN_NO_EXCEPTIONS
     cleanObj(cleaner->obj);
 #else
