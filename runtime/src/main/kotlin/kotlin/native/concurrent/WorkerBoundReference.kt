@@ -29,7 +29,6 @@ external private fun cleanWorkerBoundReference(ref: NativePtr): Unit
  * To resolve such cycles consider using [AtomicReference<WorkerBoundReference?>] which can be explicitly
  * nulled out.
  */
-@NoReorderFields
 @ExportTypeInfo("theWorkerBoundReferenceTypeInfo")
 public class WorkerBoundReference<out T : Any>(value: T) {
 
