@@ -25,4 +25,4 @@ private fun createCleanerImpl(argument: Any?, block: CPointer<CFunction<*>>): Cl
  * If [block] throws an exception, the entire program terminates.
  */
 @TypedIntrinsic(IntrinsicType.CREATE_CLEANER)
-external fun <T> createCleaner(argument: T, @VolatileLambda block: (T) -> Unit): Cleaner
+external fun <T: Any> createCleaner(argument: T, @VolatileLambda block: (T) -> Unit): Cleaner
