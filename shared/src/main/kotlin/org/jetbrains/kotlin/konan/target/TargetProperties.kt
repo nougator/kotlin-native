@@ -54,10 +54,10 @@ fun Properties.resolvablePropertyList(
 fun Properties.resolvablePropertyString(
         key: String, suffix: String? = null,
         visitedProperties: MutableSet<String> = mutableSetOf()
-): String? = propertyString(key, suffix)?.resolveValue(this, visitedProperties)?.let {
-    it.singleOrNull()
-            ?: error("$key's value should be a single string. Got ${it.joinToString()} instead.")
-}
+): String? = propertyString(key, suffix)
+        ?.split(' ')
+        ?.flatMap { it.resolveValue(this, visitedProperties) }
+        ?.joinToString(" ")
 
 /**
  * Adds trivial symbol resolving mechanism to properties files.

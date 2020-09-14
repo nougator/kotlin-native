@@ -28,6 +28,16 @@ class ResolvablePropertiesTests {
     }
 
     @Test
+    fun `list and string should have the same behavior`() {
+        val props = propertiesOf(
+                "k1" to "v1",
+                "k2" to "v2 \$k1"
+        )
+        assertEquals("v2 v1", props.resolvablePropertyString("k2"))
+        assertEquals("v2 v1", props.resolvablePropertyList("k2").joinToString(separator = " "))
+    }
+
+    @Test
     fun `list expansion`() {
         val props = propertiesOf(
                 "k1" to "v1 v2",
