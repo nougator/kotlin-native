@@ -901,6 +901,11 @@ standaloneTest("worker_bound_reference0") {
     flags = ['-tr']
 }
 
+standaloneTest("cleaner0") {
+    source = "runtime/basic/cleaner0.kt"
+    flags = ['-tr']
+}
+
 task worker0(type: KonanLocalTest) {
     enabled = (project.testTarget != 'wasm32') // Workers need pthreads.
     goldValue = "Got Input processed\nOK\n"
