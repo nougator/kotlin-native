@@ -9,6 +9,7 @@ import kotlin.test.*
 
 import kotlin.native.internal.createCleaner
 import kotlin.native.internal.GC
+import kotlin.native.internal.NativePtr
 
 class Reporter(private val reporter: () -> Unit) {
     fun report() {
@@ -17,8 +18,8 @@ class Reporter(private val reporter: () -> Unit) {
 }
 
 class ReporterWithCleaner(reporter: () -> Unit) {
-    private val impl = Reporter(reporter)
-    private val cleaner = createCleaner(impl) {
+    var impl: Reporter? = Reporter(reporter)
+    private val cleaner = createCleaner(impl!!) {
         it.report()
     }
 }
@@ -32,4 +33,49 @@ fun testReporterWithCleaner() {
     }()
     GC.collect()
     assertTrue(reported)
+}
+
+@Test
+fun testReporterWithCleanerExplicitlyNull() {
+    var reported = false
+    {
+        var x: ReporterWithCleaner? = null
+        {
+            x = ReporterWithCleaner { reported = true }
+            x!!.impl = null
+        }()
+        GC.collect()
+        assertNull(x!!.impl)
+        assertFalse(reported)
+    }()
+    GC.collect()
+    assertTrue(reported)
+}
+
+var globalInt: Int = 0
+
+@Test
+fun testCleanerWithPrimitiveType() {
+    {
+        createCleaner(42) {
+            globalInt = it
+        }
+        assertEquals(0, globalInt)
+    }()
+    GC.collect()
+    assertEquals(42, globalInt)
+}
+
+var globalPtr: NativePtr = NativePtr.NULL
+
+@Test
+fun testCleanerWithNativePtr() {
+    {
+        createCleaner(NativePtr.NULL + 42L) {
+            globalPtr = it
+        }
+        assertEquals(NativePtr.NULL, globalPtr)
+    }()
+    GC.collect()
+    assertEquals(NativePtr.NULL + 42L, globalPtr)
 }
